@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnstagram</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome per le icone fedeli a Instagram -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #000; color: #f5f5f5; }
+        .sidebar { border-right: 1px solid #262626; }
+        .post-border { border-bottom: 1px solid #262626; }
+    </style>
+</head>
+<body class="flex min-h-screen">
+
+    {% if current_user.is_authenticated %}
+    <!-- Sidebar Navigation (Desktop) -->
+    <nav class="hidden md:flex flex-col w-64 h-screen fixed sidebar p-4">
+        <div class="mb-8 mt-4 px-2 flex items-center space-x-3">
+            <img src="{{ url_for('static', filename='img/logo_icon.png') }}" alt="Vulnstagram Logo" class="w-10 h-10 object-contain">
+            <img src="{{ url_for('static', filename='img/logo_text.png') }}" alt="Vulnstagram" class="w-32 h-auto object-contain">
+        </div>
+        
+        <div class="flex flex-col space-y-2">
+            <a href="{{ url_for('main.index') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-900 rounded-lg transition-colors">
+                <i class="fa-solid fa-house text-xl"></i>
+                <span class="font-bold text-lg">Home</span>
+            </a>
+            
+            <a href="{{ url_for('main.search') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-900 rounded-lg transition-colors">
+                <i class="fa-solid fa-magnifying-glass text-xl"></i>
+                <span class="text-lg">Search</span>
+            </a>
+            
+            <!-- L'icona del Direct Messaging cruciale per il lab -->
+            <a href="/messages" class="flex items-center space-x-4 p-3 hover:bg-gray-900 rounded-lg transition-colors">
+                <i class="fa-brands fa-facebook-messenger text-xl"></i>
+                <span class="text-lg">Messages</span>
+            </a>
+            
+            <a href="{{ url_for('main.new_post') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-900 rounded-lg transition-colors">
+                <i class="fa-regular fa-square-plus text-xl"></i>
+                <span class="text-lg">Create</span>
+            </a>
+            
+            <a href="{{ url_for('main.profile', username=current_user.username) }}" class="flex items-center space-x-4 p-3 hover:bg-gray-900 rounded-lg transition-colors mt-auto">
+                <img src="{{ url_for('static', filename='uploads/' + current_user.profile_image) }}" class="w-6 h-6 rounded-full border border-gray-600 object-cover" onerror="this.src='https://via.placeholder.com/150'">
+                <span class="text-lg">Profile</span>
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="flex items-center space-x-4 p-3 hover:bg-gray-900 rounded-lg transition-colors text-red-500">
+                <i class="fa-solid fa-right-from-bracket text-xl"></i>
+                <span class="text-lg">Logout</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Mobile Bottom Nav -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-black border-t border-gray-800 z-50 flex justify-around p-3">
+        <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-house text-2xl"></i></a>
+        <a href="/messages"><i class="fa-brands fa-facebook-messenger text-2xl"></i></a>
+        <a href="{{ url_for('main.new_post') }}"><i class="fa-regular fa-square-plus text-2xl"></i></a>
+        <a href="{{ url_for('main.profile', username=current_user.username) }}"><img src="{{ url_for('static', filename='uploads/' + current_user.profile_image) }}" class="w-7 h-7 rounded-full border border-gray-600 object-cover" onerror="this.src='https://via.placeholder.com/150'"></a>
+    </nav>
+    {% endif %}
+
+    <!-- Main Content Area -->
+    <main class="w-full {% if current_user.is_authenticated %}md:ml-64{% endif %} flex justify-center pb-20 md:pb-0">
+        <div class="w-full max-w-lg mt-6">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="p-4 mb-4 mx-4 text-sm rounded-lg {% if category == 'error' or category == 'danger' %}bg-red-900 text-red-200{% else %}bg-green-900 text-green-200{% endif %}" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+</body>
+</html>

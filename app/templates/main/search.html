@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col mx-auto max-w-2xl px-4 py-8 h-screen">
+    <h2 class="text-2xl font-semibold mb-6">Search</h2>
+    
+    <form action="{{ url_for('main.search') }}" method="GET" class="mb-8 relative">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search users..." 
+               class="w-full bg-gray-900 border border-gray-800 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:border-gray-500 text-white placeholder-gray-500 transition-colors">
+        <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500"></i>
+        <button type="submit" class="hidden">Search</button>
+    </form>
+    
+    <div class="flex-1 overflow-y-auto">
+        {% if query %}
+            <!-- [VULN-START: Reflected XSS] -->
+            <!-- Spiegazione: L'input dell'utente (query) viene inserito direttamente nell'HTML
+                 con il filtro "|safe" che disabilita l'auto-escaping di Jinja2. -->
+            <h3 class="text-gray-400 text-sm font-semibold mb-4">Results for "{{ query|safe }}"</h3>
+            
+            {% if users %}
+                <div class="flex flex-col space-y-4">
+                    {% for u in users %}
+                    <a href="{{ url_for('main.profile', username=u.username) }}" class="flex items-center space-x-4 p-3 hover:bg-gray-900 rounded-lg transition-colors">
+                        <img src="{{ url_for('static', filename='uploads/' + u.profile_image) }}" alt="{{ u.username }}" class="w-12 h-12 rounded-full border border-gray-700 object-cover" onerror="this.src='https://via.placeholder.com/150'">
+                        <div class="flex flex-col">
+                            <span class="font-semibold text-white">{{ u.username }}</span>
+                            {% if u.is_private %}
+                                <span class="text-xs text-gray-400"><i class="fa-solid fa-lock text-[10px] mr-1"></i>Private</span>
+                            {% else %}
+                                <span class="text-xs text-gray-400">{{ u.email }}</span>
+                            {% endif %}
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center text-gray-500 mt-10">
+                    No users found matching "{{ query|safe }}".
+                </div>
+            {% endif %}
+            <!-- [VULN-END] -->
+        {% else %}
+            <div class="text-center text-gray-500 mt-10">
+                Search for your friends to see their photos and videos.
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="flex flex-col h-[80vh] border border-gray-800 rounded-md mx-2 md:mx-0">
+    <!-- Header -->
+    <div class="border-b border-gray-800 p-4 font-bold text-lg flex items-center justify-between">
+        <span>{{ current_user.username }}</span>
+        <i class="fa-regular fa-pen-to-square text-xl hover:text-gray-400 cursor-pointer"></i>
+    </div>
+    
+    <div class="flex flex-1 overflow-hidden">
+        <!-- Sidebar (Conversations) -->
+        <div class="hidden md:block w-1/3 border-r border-gray-800 overflow-y-auto">
+            <div class="p-4 font-semibold">Messages</div>
+            
+            {% if messages %}
+                {% for msg in messages %}
+                <!-- Mostriamo l'interlocutore (chi non è il current user) -->
+                {% set other_user = msg.sender if msg.sender.id != current_user.id else msg.receiver %}
+                <a href="{{ url_for('main.message_detail', message_id=msg.id) }}" class="p-4 flex items-center space-x-3 hover:bg-gray-900 cursor-pointer {% if active_message and active_message.id == msg.id %}bg-gray-900{% endif %}">
+                    <img src="{{ url_for('static', filename='uploads/' + other_user.profile_image) }}" class="w-12 h-12 rounded-full border border-gray-700 object-cover" onerror="this.src='https://via.placeholder.com/150'">
+                    <div class="overflow-hidden">
+                        <div class="text-sm font-semibold truncate">{{ other_user.username }}</div>
+                        <div class="text-xs text-gray-400 truncate">{{ msg.content }}</div>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="p-4 text-sm text-gray-500">No messages yet.</div>
+            {% endif %}
+        </div>
+        
+        <!-- Main Chat Area -->
+        <div class="w-full md:w-2/3 flex flex-col bg-gray-950 overflow-y-auto">
+            {% if active_message %}
+                <!-- Intestazione Chat -->
+                {% set other_user = active_message.sender if active_message.sender.id != current_user.id else active_message.receiver %}
+                <div class="border-b border-gray-800 p-4 flex items-center space-x-3">
+                    <img src="{{ url_for('static', filename='uploads/' + other_user.profile_image) }}" class="w-8 h-8 rounded-full border border-gray-700 object-cover" onerror="this.src='https://via.placeholder.com/150'">
+                    <span class="font-semibold">{{ other_user.username }}</span>
+                </div>
+                
+                <!-- Messaggi -->
+                <div class="flex-1 p-4 flex flex-col space-y-4">
+                    <!-- Singolo Messaggio Renderizzato (La nostra vulnerabilità viene mostrata qui!) -->
+                    <div class="flex {% if active_message.sender.id == current_user.id %}justify-end{% else %}justify-start{% endif %}">
+                        <div class="max-w-[70%] rounded-2xl px-4 py-2 text-sm {% if active_message.sender.id == current_user.id %}bg-blue-600 text-white{% else %}bg-gray-800 text-white{% endif %}">
+                            <div class="font-semibold text-xs mb-1 opacity-70">
+                                {{ active_message.sender.username }} &rarr; {{ active_message.receiver.username }}
+                            </div>
+                            {{ active_message.content }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Input Box -->
+                <div class="p-4 border-t border-gray-800">
+                    <div class="flex items-center bg-gray-900 rounded-full px-4 py-2 border border-gray-700">
+                        <i class="fa-regular fa-face-smile text-xl text-gray-400 cursor-pointer"></i>
+                        <input type="text" placeholder="Message..." class="bg-transparent w-full text-sm outline-none px-4 text-white">
+                        <span class="text-blue-500 font-semibold cursor-pointer">Send</span>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Schermata Vuota (Nessun messaggio selezionato) -->
+                <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                    <div class="w-24 h-24 border-2 border-gray-800 rounded-full flex items-center justify-center mb-4">
+                        <i class="fa-brands fa-facebook-messenger text-4xl"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold mb-2">Your Messages</h2>
+                    <p class="text-gray-400 text-sm mb-6">Send private photos and messages to a friend or group.</p>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1.5 px-4 rounded-lg text-sm transition-colors">Send Message</button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

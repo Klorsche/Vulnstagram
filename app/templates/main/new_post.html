@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-lg mx-auto bg-white border border-gray-300 mt-8 p-6 rounded-sm">
+    <h2 class="text-2xl font-semibold mb-6 text-center">Create new post</h2>
+    
+    <form method="POST" action="{{ url_for('main.new_post') }}" enctype="multipart/form-data" class="space-y-6">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        
+        <div class="border-2 border-dashed border-gray-300 p-8 text-center rounded-md hover:bg-gray-50 transition-colors">
+            <svg class="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <label for="file-upload" class="cursor-pointer bg-blue-500 text-white px-4 py-2 rounded font-semibold text-sm hover:bg-blue-600 transition-colors">
+                Select from computer
+            </label>
+            <input id="file-upload" name="image" type="file" accept="image/*" class="hidden" required>
+            <p class="mt-2 text-xs text-gray-500" id="file-name">No file selected</p>
+        </div>
+        
+        <div>
+            <textarea name="caption" rows="3" placeholder="Write a caption..." class="w-full border border-gray-300 rounded-sm p-3 text-sm focus:outline-none focus:border-gray-400 resize-none"></textarea>
+        </div>
+        
+        <button type="submit" class="w-full bg-blue-500 text-white rounded-md py-2 font-semibold text-sm hover:bg-blue-600 transition-colors">Share</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('file-upload').addEventListener('change', function(e) {
+        var fileName = e.target.files[0] ? e.target.files[0].name : 'No file selected';
+        document.getElementById('file-name').textContent = fileName;
+    });
+</script>
+{% endblock %}
